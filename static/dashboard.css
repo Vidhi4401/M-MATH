@@ -1,0 +1,150 @@
+:root{
+
+--bg-light: linear-gradient(135deg,#667eea,#764ba2);
+--bg-dark: linear-gradient(135deg,#141e30,#243b55);
+
+--card-light: rgba(255,255,255,0.15);
+--card-dark: rgba(0,0,0,0.4);
+
+--text-light:white;
+--text-dark:#ddd;
+
+}
+
+body{
+
+margin:0;
+font-family:Segoe UI;
+min-height:100vh;
+
+background:var(--bg-light);
+color:var(--text-light);
+
+transition:0.5s;
+
+}
+
+body.dark{
+
+background:var(--bg-dark);
+color:var(--text-dark);
+
+}
+
+.navbar{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:15px 30px;
+
+background:rgba(0,0,0,0.2);
+
+backdrop-filter: blur(10px);
+
+}
+
+.navbar h2{
+
+margin:0;
+
+}
+
+.navbar button{
+
+padding:8px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+
+}
+
+.container{
+
+padding:30px;
+
+}
+
+/* grid */
+
+.grid{
+
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+
+}
+
+/* card */
+
+.card{
+
+background:var(--card-light);
+
+padding:20px;
+
+border-radius:15px;
+
+backdrop-filter: blur(15px);
+
+box-shadow:0 0 15px rgba(0,0,0,0.2);
+
+transition:0.3s;
+
+}
+
+body.dark .card{
+
+background:var(--card-dark);
+
+}
+
+.card:hover{
+
+transform:translateY(-5px) scale(1.02);
+
+}
+
+.card button{
+
+margin-top:10px;
+padding:8px 15px;
+
+border:none;
+border-radius:8px;
+
+background:#00c6ff;
+color:white;
+
+cursor:pointer;
+
+}
+
+/* select */
+
+select{
+
+padding:10px;
+border-radius:8px;
+border:none;
+margin-bottom:20px;
+
+}
+
+/* upload form */
+
+.upload{
+
+background:var(--card-light);
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+
+}
+
+.toggle{
+
+cursor:pointer;
+
+}

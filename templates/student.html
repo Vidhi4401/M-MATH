@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>M-MATH Student</title>
+
+<link rel="stylesheet" href="/static/dashboard.css">
+
+<script src="/static/script.js"></script>
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+<h2>M-MATH STUDENT</h2>
+
+<div>
+
+<button onclick="toggleDark()">🌙</button>
+
+<a href="/logout">
+<button>Logout</button>
+</a>
+
+</div>
+
+</div>
+
+<div class="container">
+
+<h1>Study Materials</h1>
+
+<select id="classSelect" onchange="loadFiles()">
+
+<option value="">Select Class</option>
+
+<option value="6">Class 6</option>
+<option value="7">Class 7</option>
+<option value="8">Class 8</option>
+<option value="9">Class 9</option>
+<option value="10">Class 10</option>
+
+</select>
+
+<div id="files" class="grid"></div>
+
+</div>
+
+</body>
+</html>

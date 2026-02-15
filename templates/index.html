@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>M-MATH</title>
+
+<link rel="stylesheet" href="/static/landing.css">
+
+<script>
+
+function toggleForm(){
+
+const login=document.getElementById("loginForm");
+const signup=document.getElementById("signupForm");
+
+login.style.display =
+login.style.display==="none"?"block":"none";
+
+signup.style.display =
+signup.style.display==="none"?"block":"none";
+
+}
+
+</script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left">
+
+<h1>M-MATH</h1>
+
+<p>
+
+Welcome to M-MATH — a modern platform to learn mathematics.
+
+Access notes, PDFs, and materials uploaded by your teacher.
+
+Study anywhere on mobile or laptop.
+
+</p>
+
+</div>
+
+
+<div class="right">
+
+<!-- LOGIN -->
+
+<form id="loginForm" action="/login" method="post">
+
+<h2>Login</h2>
+
+<input name="username" placeholder="Username" required>
+
+<input name="password" type="password" placeholder="Password" required>
+
+<button>Login</button>
+
+<p class="toggle" onclick="toggleForm()">
+
+Create new account
+
+</p>
+
+</form>
+
+
+<!-- SIGNUP -->
+
+<form id="signupForm" action="/signup" method="post" style="display:none">
+
+<h2>Signup</h2>
+
+<input name="username" placeholder="Username" required>
+
+<input name="password" type="password" placeholder="Password" required>
+
+<button>Signup</button>
+
+<p class="toggle" onclick="toggleForm()">
+
+Already have account? Login
+
+</p>
+
+</form>
+
+</div>
+
+</div>
+
+</body>
+</html>

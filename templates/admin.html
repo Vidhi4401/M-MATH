@@ -1,0 +1,81 @@
+<html>
+<head>
+
+<title>M-MATH Admin</title>
+
+<link rel="stylesheet" href="/static/dashboard.css">
+
+<script src="/static/script.js"></script>
+
+</head>
+
+<body>
+
+<div class="navbar">
+
+<h2>M-MATH ADMIN</h2>
+
+<div>
+
+<button onclick="toggleDark()">🌙</button>
+
+<a href="/logout">
+<button>Logout</button>
+</a>
+
+</div>
+
+</div>
+
+<div class="container">
+
+<form class="upload" action="/upload" method="post" enctype="multipart/form-data">
+
+<select name="class_name">
+
+<option>6</option>
+<option>7</option>
+<option>8</option>
+<option>9</option>
+<option>10</option>
+
+</select>
+
+<input name="topic" placeholder="Topic">
+
+<input type="file" name="file">
+
+<button>Upload</button>
+
+</form>
+
+<div class="grid">
+
+{% for file in files %}
+
+<div class="card">
+
+<h3>{{file.topic}}</h3>
+
+<button onclick="window.open('/uploads/{{file.filename}}')">
+
+View
+
+</button>
+
+<button onclick="location.href='/delete/{{file.id}}'">
+
+Delete
+
+</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+</body>
+</html>
