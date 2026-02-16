@@ -1,69 +1,133 @@
 
-function toggleDark(){
+async function loadSubjects(){
 
-document.body.classList.toggle("dark");
+const classId =
+document.getElementById("classSelect").value;
 
-localStorage.setItem(
-"dark",
-document.body.classList.contains("dark")
-);
+if(!classId) return;
+
+const res =
+await fetch(`/api/subjects/${classId}`);
+
+const subjects =
+await res.json();
+
+const subjectSelect =
+document.getElementById("subjectSelect");
+
+subjectSelect.innerHTML =
+"<option value=''>Select Subject</option>";
+
+subjects.forEach(s=>{
+
+subjectSelect.innerHTML +=
+`<option value="${s.id}">
+${s.name}
+</option>`;
+
+});
+
+document.getElementById("chapterSelect").innerHTML="";
+document.getElementById("notesList").innerHTML="";
 
 }
 
-window.onload=()=>{
 
-if(localStorage.getItem("dark")==="true"){
 
-document.body.classList.add("dark");
+async function loadChapters(){
+
+const subjectId =
+document.getElementById("subjectSelect").value;
+
+if(!subjectId) return;
+
+const res =
+await fetch(`/api/chapters/${subjectId}`);
+
+const chapters =
+await res.json();
+
+const chapterSelect =
+document.getElementById("chapterSelect");
+
+chapterSelect.innerHTML =
+"<option value=''>Select Chapter</option>";
+
+chapters.forEach(c=>{
+
+chapterSelect.innerHTML +=
+`<option value="${c.id}">
+${c.name}
+</option>`;
+
+});
+
+document.getElementById("notesList").innerHTML="";
 
 }
 
-};
+
+// STUDENT BUTTON
+
+function startStudent(){
+
+window.location.href = "/student";
+
+}
 
 
-/* LOAD FILES */
+// ADMIN POPUP OPEN
 
-async function loadFiles(){
+function openAdminPopup(){
 
-let cls=document.getElementById("classSelect").value;
+document.getElementById("adminPopup").style.display = "block";
 
-let res=await fetch(`/files/${cls}`);
+}
 
-let files=await res.json();
 
-let container=document.getElementById("files");
+// ADMIN POPUP CLOSE
+
+function closeAdminPopup(){
+
+document.getElementById("adminPopup").style.display = "none";
+
+}
+
+
+async function loadNotes(){
+
+const chapterId =
+document.getElementById("chapterSelect").value;
+
+if(!chapterId) return;
+
+const res =
+await fetch(`/api/notes/${chapterId}`);
+
+const notes =
+await res.json();
+
+const container =
+document.getElementById("notesList");
 
 container.innerHTML="";
 
-if(files.length===0){
+notes.forEach(n=>{
 
-container.innerHTML="<p>No files available</p>";
-return;
-
-}
-
-files.forEach(f=>{
-
-container.innerHTML+=`
+container.innerHTML += `
 
 <div class="card">
 
-<h3>${f.topic}</h3>
+<h4>${n.title}</h4>
 
-<button onclick="window.open('/uploads/${f.filename}')">
+<a href="/view/${n.filename}" target="_blank">
+View Online
+</a>
 
-View
+&nbsp;&nbsp;
 
-</button>
-
-<a href="/uploads/${f.filename}" download>
-
-<button>
-
+<a href="/download/${n.filename}">
 Download
-
-</button>
-
 </a>
 
 </div>

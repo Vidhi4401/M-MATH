@@ -1,54 +1,31 @@
 import os
 
-from fastapi import FastAPI, Request, Form, UploadFile, File, Depends, Cookie, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi import FastAPI, Request, Form, UploadFile, File, Depends
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from sqlalchemy.orm import Session
 
-import models
 from database import engine, SessionLocal
-from auth import create_token, verify_token
-from config import ADMIN_USERNAME, ADMIN_PASSWORD
+from models import Base, Class, Subject, Chapter, Note
+from config import ADMIN_SECRET
 
 
-# ===============================
-# CREATE DATABASE TABLES
-# ===============================
+Base.metadata.create_all(bind=engine)
 
-models.Base.metadata.create_all(bind=engine)
+app = FastAPI(title="M MATH")
 
-
-# ===============================
-# CREATE FASTAPI APP
-# ===============================
-
-app = FastAPI(title="M-MATH")
-
-
-# ===============================
-# CREATE UPLOAD DIRECTORY
-# ===============================
 
 UPLOAD_DIR = "uploads"
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-# ===============================
-# STATIC AND TEMPLATE SETUP
-# ===============================
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 templates = Jinja2Templates(directory="templates")
 
-
-# ===============================
-# DATABASE DEPENDENCY
-# ===============================
 
 def get_db():
 
@@ -56,330 +33,336 @@ def get_db():
 
     try:
         yield db
+
     finally:
         db.close()
 
 
-# ===============================
-# HOME PAGE
-# ===============================
+# ==========================
+# LANDING
+# ==========================
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request):
+def landing(request: Request):
 
     return templates.TemplateResponse(
-        "index.html",
+        "landing.html",
         {"request": request}
     )
 
 
-# ===============================
-# SIGNUP (STUDENT)
-# ===============================
+# ==========================
+# ADMIN ACCESS
+# ==========================
 
-@app.post("/signup")
-def signup(
-    username: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
+@app.post("/admin-access")
+def admin_access(secret: str = Form(...)):
 
-    existing = db.query(models.User).filter(
-        models.User.username == username
-    ).first()
+    if secret == ADMIN_SECRET:
 
-    if existing:
-
-        return RedirectResponse("/", status_code=302)
-
-
-    new_user = models.User(
-        username=username,
-        password=password,
-        role="student"
-    )
-
-    db.add(new_user)
-    db.commit()
+        return RedirectResponse("/admin", status_code=302)
 
     return RedirectResponse("/", status_code=302)
 
 
-# ===============================
-# LOGIN
-# ===============================
-
-@app.post("/login")
-def login(
-    username: str = Form(...),
-    password: str = Form(...),
-    db: Session = Depends(get_db)
-):
-
-    # ADMIN LOGIN
-    if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-
-        token = create_token({
-            "username": username,
-            "role": "admin"
-        })
-
-        response = RedirectResponse("/admin", status_code=302)
-
-        response.set_cookie(
-            key="token",
-            value=token,
-            httponly=True
-        )
-
-        return response
-
-
-    # STUDENT LOGIN
-    user = db.query(models.User).filter(
-        models.User.username == username,
-        models.User.password == password
-    ).first()
-
-    if user:
-
-        token = create_token({
-            "username": username,
-            "role": "student"
-        })
-
-        response = RedirectResponse("/student", status_code=302)
-
-        response.set_cookie(
-            key="token",
-            value=token,
-            httponly=True
-        )
-
-        return response
-
-
-    return RedirectResponse("/", status_code=302)
-
-
-# ===============================
-# ADMIN DASHBOARD
-# ===============================
+# ==========================
+# ADMIN PAGE
+# ==========================
 
 @app.get("/admin", response_class=HTMLResponse)
-def admin_dashboard(
-    request: Request,
-    token: str = Cookie(None),
-    db: Session = Depends(get_db)
-):
+def admin_page(request: Request, db: Session = Depends(get_db)):
 
-    if not token:
-
-        return RedirectResponse("/", status_code=302)
-
-    try:
-
-        data = verify_token(token)
-
-    except:
-
-        return RedirectResponse("/", status_code=302)
-
-
-    if data["role"] != "admin":
-
-        return RedirectResponse("/", status_code=302)
-
-
-    files = db.query(models.File).all()
+    classes = db.query(Class).all()
 
     return templates.TemplateResponse(
         "admin.html",
         {
             "request": request,
-            "files": files,
-            "username": data["username"]
+            "classes": classes
         }
     )
 
 
-# ===============================
-# STUDENT DASHBOARD
-# ===============================
+# ==========================
+# STUDENT PAGE
+# ==========================
 
 @app.get("/student", response_class=HTMLResponse)
-def student_dashboard(
-    request: Request,
-    token: str = Cookie(None)
-):
+def student_page(request: Request, db: Session = Depends(get_db)):
 
-    if not token:
-
-        return RedirectResponse("/", status_code=302)
-
-    try:
-
-        data = verify_token(token)
-
-    except:
-
-        return RedirectResponse("/", status_code=302)
-
-
-    if data["role"] != "student":
-
-        return RedirectResponse("/", status_code=302)
-
+    classes = db.query(Class).all()
 
     return templates.TemplateResponse(
         "student.html",
         {
             "request": request,
-            "username": data["username"]
+            "classes": classes
         }
     )
 
 
-# ===============================
-# GET FILES BY CLASS (STUDENT)
-# ===============================
+# ==========================
+# CREATE CLASS
+# ==========================
 
-@app.get("/files/{class_name}")
-def get_files(
-    class_name: str,
-    token: str = Cookie(None),
-    db: Session = Depends(get_db)
-):
+@app.post("/create-class")
+def create_class(name: str = Form(...), db: Session = Depends(get_db)):
 
-    if not token:
+    db.add(Class(name=name))
 
-        return JSONResponse([])
-
-    try:
-
-        verify_token(token)
-
-    except:
-
-        return JSONResponse([])
-
-
-    files = db.query(models.File).filter(
-        models.File.class_name == class_name
-    ).all()
-
-
-    return [
-
-        {
-            "id": f.id,
-            "class_name": f.class_name,
-            "topic": f.topic,
-            "filename": f.filename,
-            "uploaded_by": f.uploaded_by
-        }
-
-        for f in files
-
-    ]
-
-
-# ===============================
-# FILE UPLOAD (ADMIN ONLY)
-# ===============================
-
-@app.post("/upload")
-def upload_file(
-    class_name: str = Form(...),
-    topic: str = Form(...),
-    file: UploadFile = File(...),
-    token: str = Cookie(None),
-    db: Session = Depends(get_db)
-):
-
-    if not token:
-
-        return RedirectResponse("/", status_code=302)
-
-    data = verify_token(token)
-
-    if data["role"] != "admin":
-
-        return RedirectResponse("/", status_code=302)
-
-
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
-
-    with open(file_path, "wb") as buffer:
-
-        buffer.write(file.file.read())
-
-
-    new_file = models.File(
-
-        class_name=class_name,
-        topic=topic,
-        filename=file.filename,
-        uploaded_by=data["username"]
-
-    )
-
-    db.add(new_file)
     db.commit()
 
     return RedirectResponse("/admin", status_code=302)
 
 
-# ===============================
-# DELETE FILE (ADMIN ONLY)
-# ===============================
+# ==========================
+# DELETE CLASS
+# ==========================
 
-@app.get("/delete/{file_id}")
-def delete_file(
-    file_id: int,
-    token: str = Cookie(None),
-    db: Session = Depends(get_db)
-):
+@app.get("/delete-class/{class_id}")
+def delete_class(class_id: int, db: Session = Depends(get_db)):
 
-    if not token:
-
-        return RedirectResponse("/", status_code=302)
-
-    data = verify_token(token)
-
-    if data["role"] != "admin":
-
-        return RedirectResponse("/", status_code=302)
-
-
-    file = db.query(models.File).filter(
-        models.File.id == file_id
+    class_obj = db.query(Class).filter(
+        Class.id == class_id
     ).first()
 
-    if file:
+    if class_obj:
 
-        file_path = os.path.join(UPLOAD_DIR, file.filename)
+        # delete notes files
+        for subject in class_obj.subjects:
+            for chapter in subject.chapters:
+                for note in chapter.notes:
 
-        if os.path.exists(file_path):
+                    path = os.path.join(UPLOAD_DIR, note.filename)
 
-            os.remove(file_path)
+                    if os.path.exists(path):
+                        os.remove(path)
 
-        db.delete(file)
+        db.delete(class_obj)
+
         db.commit()
-
 
     return RedirectResponse("/admin", status_code=302)
 
 
-# ===============================
-# LOGOUT
-# ===============================
+# ==========================
+# CREATE SUBJECT
+# ==========================
 
-@app.get("/logout")
-def logout():
+@app.post("/create-subject")
+def create_subject(
+    name: str = Form(...),
+    class_id: int = Form(...),
+    db: Session = Depends(get_db)
+):
 
-    response = RedirectResponse("/", status_code=302)
+    db.add(
+        Subject(
+            name=name,
+            class_id=class_id
+        )
+    )
 
-    response.delete_cookie("token")
+    db.commit()
 
-    return response
+    return RedirectResponse("/admin", status_code=302)
+
+
+# ==========================
+# DELETE SUBJECT
+# ==========================
+
+@app.get("/delete-subject/{subject_id}")
+def delete_subject(subject_id: int, db: Session = Depends(get_db)):
+
+    subject = db.query(Subject).filter(
+        Subject.id == subject_id
+    ).first()
+
+    if subject:
+
+        for chapter in subject.chapters:
+            for note in chapter.notes:
+
+                path = os.path.join(UPLOAD_DIR, note.filename)
+
+                if os.path.exists(path):
+                    os.remove(path)
+
+        db.delete(subject)
+
+        db.commit()
+
+    return RedirectResponse("/admin", status_code=302)
+
+
+# ==========================
+# CREATE CHAPTER
+# ==========================
+
+@app.post("/create-chapter")
+def create_chapter(
+    name: str = Form(...),
+    subject_id: int = Form(...),
+    db: Session = Depends(get_db)
+):
+
+    db.add(
+        Chapter(
+            name=name,
+            subject_id=subject_id
+        )
+    )
+
+    db.commit()
+
+    return RedirectResponse("/admin", status_code=302)
+
+
+# ==========================
+# DELETE CHAPTER
+# ==========================
+
+@app.get("/delete-chapter/{chapter_id}")
+def delete_chapter(chapter_id: int, db: Session = Depends(get_db)):
+
+    chapter = db.query(Chapter).filter(
+        Chapter.id == chapter_id
+    ).first()
+
+    if chapter:
+
+        for note in chapter.notes:
+
+            path = os.path.join(UPLOAD_DIR, note.filename)
+
+            if os.path.exists(path):
+                os.remove(path)
+
+        db.delete(chapter)
+
+        db.commit()
+
+    return RedirectResponse("/admin", status_code=302)
+
+
+# ==========================
+# UPLOAD NOTE
+# ==========================
+
+@app.post("/upload-note")
+def upload_note(
+    title: str = Form(...),
+    chapter_id: int = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+
+    path = os.path.join(UPLOAD_DIR, file.filename)
+
+    with open(path, "wb") as f:
+        f.write(file.file.read())
+
+    db.add(
+        Note(
+            title=title,
+            filename=file.filename,
+            chapter_id=chapter_id
+        )
+    )
+
+    db.commit()
+
+    return RedirectResponse("/admin", status_code=302)
+
+
+# ==========================
+# DELETE NOTE
+# ==========================
+
+@app.get("/delete-note/{note_id}")
+def delete_note(note_id: int, db: Session = Depends(get_db)):
+
+    note = db.query(Note).filter(
+        Note.id == note_id
+    ).first()
+
+    if note:
+
+        path = os.path.join(UPLOAD_DIR, note.filename)
+
+        if os.path.exists(path):
+            os.remove(path)
+
+        db.delete(note)
+
+        db.commit()
+
+    return RedirectResponse("/admin", status_code=302)
+
+
+# ==========================
+# API ENDPOINTS
+# ==========================
+
+@app.get("/api/subjects/{class_id}")
+def get_subjects(class_id: int, db: Session = Depends(get_db)):
+
+    subjects = db.query(Subject).filter(
+        Subject.class_id == class_id
+    ).all()
+
+    return [
+        {"id": s.id, "name": s.name}
+        for s in subjects
+    ]
+
+
+@app.get("/api/chapters/{subject_id}")
+def get_chapters(subject_id: int, db: Session = Depends(get_db)):
+
+    chapters = db.query(Chapter).filter(
+        Chapter.subject_id == subject_id
+    ).all()
+
+    return [
+        {"id": c.id, "name": c.name}
+        for c in chapters
+    ]
+
+
+@app.get("/api/notes/{chapter_id}")
+def get_notes(chapter_id: int, db: Session = Depends(get_db)):
+
+    notes = db.query(Note).filter(
+        Note.chapter_id == chapter_id
+    ).all()
+
+    return [
+        {"title": n.title, "filename": n.filename}
+        for n in notes
+    ]
+
+
+# ==========================
+# VIEW FILE
+# ==========================
+
+@app.get("/view/{filename}")
+def view_file(filename: str):
+
+    path = os.path.join(UPLOAD_DIR, filename)
+
+    return FileResponse(path, media_type="application/pdf")
+
+
+# ==========================
+# DOWNLOAD FILE
+# ==========================
+
+@app.get("/download/{filename}")
+def download_file(filename: str):
+
+    path = os.path.join(UPLOAD_DIR, filename)
+
+    return FileResponse(path, filename=filename)

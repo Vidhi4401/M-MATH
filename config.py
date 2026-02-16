@@ -1,4 +1,3 @@
-SECRET_KEY = "mmath_secret_key_123"
+ADMIN_SECRET = "#1420//7538#"
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin123"
+DATABASE_URL = "postgresql://postgres:v4410p@localhost:5432/mmath"

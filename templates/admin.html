@@ -1,11 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
 
 <title>M-MATH Admin</title>
 
-<link rel="stylesheet" href="/static/dashboard.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="/static/script.js"></script>
+<link rel="stylesheet" href="/static/dashboard.css">
 
 </head>
 
@@ -13,67 +14,214 @@
 
 <div class="navbar">
 
-<h2>M-MATH ADMIN</h2>
+<h2>M-MATH Admin Panel</h2>
 
-<div>
-
-<button onclick="toggleDark()">🌙</button>
-
-<a href="/logout">
-<button>Logout</button>
+<a href="/">
+<button class="logout">Home</button>
 </a>
 
 </div>
 
-</div>
 
 <div class="container">
 
-<form class="upload" action="/upload" method="post" enctype="multipart/form-data">
-
-<select name="class_name">
-
-<option>6</option>
-<option>7</option>
-<option>8</option>
-<option>9</option>
-<option>10</option>
-
-</select>
-
-<input name="topic" placeholder="Topic">
-
-<input type="file" name="file">
-
-<button>Upload</button>
-
-</form>
-
-<div class="grid">
-
-{% for file in files %}
+<!-- CREATE CLASS ALWAYS AVAILABLE -->
 
 <div class="card">
 
-<h3>{{file.topic}}</h3>
+<h3>Create Class</h3>
 
-<button onclick="window.open('/uploads/{{file.filename}}')">
+<form action="/create-class" method="post">
 
-View
+<input name="name" placeholder="Enter Class Name" required>
 
-</button>
+<button>Create Class</button>
 
-<button onclick="location.href='/delete/{{file.id}}'">
+</form>
 
-Delete
+</div>
 
-</button>
+
+<!-- CREATE SUBJECT -->
+
+<div class="card">
+
+<h3>Create Subject</h3>
+
+<form action="/create-subject" method="post">
+
+<input name="name" placeholder="Enter Subject Name" required>
+
+<select name="class_id" required>
+
+<option value="">Select Class</option>
+
+{% for c in classes %}
+
+<option value="{{c.id}}">
+{{c.name}}
+</option>
+
+{% endfor %}
+
+</select>
+
+<button>Create Subject</button>
+
+</form>
+
+</div>
+
+
+<!-- CREATE CHAPTER -->
+
+<div class="card">
+
+<h3>Create Chapter</h3>
+
+<form action="/create-chapter" method="post">
+
+<input name="name" placeholder="Enter Chapter Name" required>
+
+<select name="subject_id" required>
+
+<option value="">Select Subject</option>
+
+{% for c in classes %}
+{% for s in c.subjects %}
+
+<option value="{{s.id}}">
+{{c.name}} - {{s.name}}
+</option>
+
+{% endfor %}
+{% endfor %}
+
+</select>
+
+<button>Create Chapter</button>
+
+</form>
+
+</div>
+
+
+<!-- UPLOAD NOTE -->
+
+<div class="card">
+
+<h3>Upload Note</h3>
+
+<form action="/upload-note" method="post" enctype="multipart/form-data">
+
+<input name="title" placeholder="Note Title" required>
+
+<select name="chapter_id" required>
+
+<option value="">Select Chapter</option>
+
+{% for c in classes %}
+{% for s in c.subjects %}
+{% for ch in s.chapters %}
+
+<option value="{{ch.id}}">
+{{c.name}} - {{s.name}} - {{ch.name}}
+</option>
+
+{% endfor %}
+{% endfor %}
+{% endfor %}
+
+</select>
+
+<input type="file" name="file" required>
+
+<button>Upload Note</button>
+
+</form>
+
+</div>
+
+
+<!-- EXISTING DATA -->
+
+<div class="card">
+
+<h3>Manage Data</h3>
+
+{% if classes|length == 0 %}
+
+<p>No classes created yet.</p>
+
+{% endif %}
+
+{% for c in classes %}
+
+<div class="item">
+
+<h4>
+
+{{c.name}}
+
+<a href="/delete-class/{{c.id}}">
+<button class="delete">Delete</button>
+</a>
+
+</h4>
+
+
+{% for s in c.subjects %}
+
+<div class="sub-item">
+
+<b>{{s.name}}</b>
+
+<a href="/delete-subject/{{s.id}}">
+<button class="delete">Delete</button>
+</a>
+
+{% for ch in s.chapters %}
+
+<div class="chapter">
+
+{{ch.name}}
+
+<a href="/delete-chapter/{{ch.id}}">
+<button class="delete">Delete</button>
+</a>
+
+{% for n in ch.notes %}
+
+<div class="note">
+
+{{n.title}}
+
+<a href="/view/{{n.filename}}" target="_blank">
+<button>View</button>
+</a>
+
+<a href="/delete-note/{{n.id}}">
+<button class="delete">Delete</button>
+</a>
 
 </div>
 
 {% endfor %}
 
 </div>
+
+{% endfor %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
 
 </div>
 

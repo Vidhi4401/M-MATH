@@ -1,128 +1,86 @@
-:root{
-
---bg-light: linear-gradient(135deg,#667eea,#764ba2);
---bg-dark: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-
---card-light: rgba(255,255,255,0.2);
---card-dark: rgba(0,0,0,0.3);
-
---text-light: white;
---text-dark: #e0e0e0;
-
-}
-
 body{
 
 margin:0;
-font-family:'Segoe UI',sans-serif;
-min-height:100vh;
-background:var(--bg-light);
-color:var(--text-light);
+font-family:Segoe UI;
 
-display:flex;
-align-items:center;
-justify-content:center;
+background:linear-gradient(-45deg,#667eea,#764ba2,#6dd5ed,#2193b0);
 
-transition:all 0.5s ease;
+background-size:400% 400%;
 
-}
+animation:bg 12s infinite;
 
-/* dark mode */
-
-body.dark{
-
-background:var(--bg-dark);
-color:var(--text-dark);
-
-}
-
-.container{
-
-background:var(--card-light);
-padding:40px;
-border-radius:15px;
-backdrop-filter: blur(15px);
-
-box-shadow:0 0 30px rgba(0,0,0,0.3);
-
-width:350px;
-
-animation:fadeIn 1s ease;
-
-}
-
-body.dark .container{
-
-background:var(--card-dark);
-
-}
-
-h1{
+color:white;
 
 text-align:center;
-margin-bottom:20px;
 
 }
 
-input{
+@keyframes bg{
 
-width:100%;
-padding:12px;
-margin:10px 0;
-border:none;
-border-radius:8px;
-outline:none;
+0%{background-position:0%}
+50%{background-position:100%}
+100%{background-position:0%}
+
+}
+
+.title{
+
+font-size:60px;
+
+margin-top:100px;
+
+}
+
+.subtitle{
+
+font-size:20px;
 
 }
 
 button{
 
-width:100%;
-padding:12px;
+padding:15px 30px;
+
+margin:10px;
+
 border:none;
-border-radius:8px;
+
+border-radius:10px;
+
 background:#00c6ff;
+
 color:white;
-font-size:16px;
-cursor:pointer;
 
-transition:0.3s;
-
-}
-
-button:hover{
-
-transform:scale(1.05);
-background:#0072ff;
-
-}
-
-/* toggle */
-
-.toggle{
-
-position:absolute;
-top:20px;
-right:20px;
 cursor:pointer;
 
 }
 
-@keyframes fadeIn{
+.popup{
 
-from{opacity:0; transform:translateY(20px)}
-to{opacity:1; transform:translateY(0)}
+display:none;
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+background:rgba(0,0,0,0.5);
 
 }
 
-/* mobile */
+.popup-content{
 
-@media(max-width:500px){
+background:white;
 
-.container{
+color:black;
 
-width:90%;
+padding:20px;
 
-}
+margin:200px auto;
+
+width:300px;
 
 }

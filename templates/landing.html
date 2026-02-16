@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>M-MATH</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="/static/style.css">
+
+<script src="/static/script.js"></script>
+
+</head>
+
+<body>
+
+<div class="landing-container">
+
+<h1 class="title">M-MATH</h1>
+
+<p class="subtitle">
+Modern Mathematics Learning Platform
+</p>
+
+<div class="buttons">
+
+<button onclick="startStudent()">
+Start as Student
+</button>
+
+<button onclick="openAdminPopup()">
+Start as Admin
+</button>
+
+</div>
+
+</div>
+
+
+<!-- ADMIN SECRET POPUP -->
+
+<div id="adminPopup" class="popup">
+
+<div class="popup-content">
+
+<h3>Enter Admin Secret Key</h3>
+
+<form action="/admin-access" method="post">
+
+<input type="password" name="secret" required>
+
+<button type="submit">
+Enter
+</button>
+
+</form>
+
+<button onclick="closeAdminPopup()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</body>
+</html>
