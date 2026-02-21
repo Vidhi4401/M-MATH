@@ -1,0 +1,32 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment file (secrets)
+.env
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# VS Code settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# Mac files
+.DS_Store
+
+# Upload folder (optional, if you don't want PDFs on GitHub)
+uploads/
+
+# Database files (if using SQLite)
+*.db
+*.sqlite3
+
+# Logs
+*.log

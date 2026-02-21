@@ -1,3 +1,10 @@
-ADMIN_SECRET = "#1420//7538#"
+import os
+from dotenv import load_dotenv
 
-DATABASE_URL = "postgresql://postgres:v4410p@localhost:5432/mmath"
+# load .env file
+load_dotenv()
+
+# fetch variables
+ADMIN_SECRET = os.getenv("ADMIN_SECRET")
+
+DATABASE_URL = os.getenv("DATABASE_URL")

@@ -11,16 +11,20 @@
 </head>
 
 <body>
-
 <div class="navbar">
 
-<h2>M-MATH Admin Panel</h2>
+<div class="nav-left">
 
-<a href="/">
-<button class="logout">Home</button>
-</a>
+<h2>M - MATH</h2>
+<span class="role">ADMIN</span>
 
 </div>
+
+<img src="/static/logo.png" class="nav-logo">
+
+</div>
+
+
 
 
 <div class="container">
@@ -143,87 +147,138 @@
 </div>
 
 
-<!-- EXISTING DATA -->
+
+
+<!-- DELETE CLASS CARD -->
 
 <div class="card">
 
-<h3>Manage Data</h3>
+<h3>Delete Class</h3>
 
-{% if classes|length == 0 %}
+<form method="get" action="" onsubmit="this.action='/delete-class/' + this.class_id.value">
 
-<p>No classes created yet.</p>
+<select name="class_id" required>
 
-{% endif %}
+<option value="">Select Class</option>
 
 {% for c in classes %}
-
-<div class="item">
-
-<h4>
-
+<option value="{{c.id}}">
 {{c.name}}
+</option>
+{% endfor %}
 
-<a href="/delete-class/{{c.id}}">
-<button class="delete">Delete</button>
-</a>
+</select>
 
-</h4>
+<button type="submit" class="delete">
+Delete Class
+</button>
+
+</form>
+
+</div>
 
 
+
+<!-- DELETE SUBJECT CARD -->
+
+<div class="card">
+
+<h3>Delete Subject</h3>
+
+<form method="get" action="" onsubmit="this.action='/delete-subject/' + this.subject_id.value">
+
+<select name="subject_id" required>
+
+<option value="">Select Subject</option>
+
+{% for c in classes %}
 {% for s in c.subjects %}
+<option value="{{s.id}}">
+{{c.name}} - {{s.name}}
+</option>
+{% endfor %}
+{% endfor %}
 
-<div class="sub-item">
+</select>
 
-<b>{{s.name}}</b>
+<button type="submit" class="delete">
+Delete Subject
+</button>
 
-<a href="/delete-subject/{{s.id}}">
-<button class="delete">Delete</button>
-</a>
+</form>
 
+</div>
+
+
+
+<!-- DELETE CHAPTER CARD -->
+
+<div class="card">
+
+<h3>Delete Chapter</h3>
+
+<form method="get" action="" onsubmit="this.action='/delete-chapter/' + this.chapter_id.value">
+
+<select name="chapter_id" required>
+
+<option value="">Select Chapter</option>
+
+{% for c in classes %}
+{% for s in c.subjects %}
 {% for ch in s.chapters %}
+<option value="{{ch.id}}">
+{{c.name}} - {{s.name}} - {{ch.name}}
+</option>
+{% endfor %}
+{% endfor %}
+{% endfor %}
 
-<div class="chapter">
+</select>
 
-{{ch.name}}
+<button type="submit" class="delete">
+Delete Chapter
+</button>
 
-<a href="/delete-chapter/{{ch.id}}">
-<button class="delete">Delete</button>
-</a>
+</form>
 
+</div>
+
+
+
+<!-- DELETE NOTE CARD -->
+
+<div class="card">
+
+<h3>Delete Note</h3>
+
+<form method="get" action="" onsubmit="this.action='/delete-note/' + this.note_id.value">
+
+<select name="note_id" required>
+
+<option value="">Select Note</option>
+
+{% for c in classes %}
+{% for s in c.subjects %}
+{% for ch in s.chapters %}
 {% for n in ch.notes %}
-
-<div class="note">
-
-{{n.title}}
-
-<a href="/view/{{n.filename}}" target="_blank">
-<button>View</button>
-</a>
-
-<a href="/delete-note/{{n.id}}">
-<button class="delete">Delete</button>
-</a>
-
-</div>
-
+<option value="{{n.id}}">
+{{c.name}} - {{s.name}} - {{ch.name}} - {{n.title}}
+</option>
+{% endfor %}
+{% endfor %}
+{% endfor %}
 {% endfor %}
 
-</div>
+</select>
 
-{% endfor %}
+<button type="submit" class="delete">
+Delete Note
+</button>
 
-</div>
-
-{% endfor %}
-
-</div>
-
-{% endfor %}
+</form>
 
 </div>
 
-
-</div>
 
 </body>
 </html>
